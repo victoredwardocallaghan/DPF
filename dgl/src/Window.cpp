@@ -151,6 +151,7 @@ struct Window::PrivateData {
 	glfwSetWindowCloseCallback(fView, onCloseCallback);
 
         glfwMakeContextCurrent(fView);
+	//glfwSwapInterval(0);
 
         fApp.pData->windows.push_back(fSelf);
 
@@ -556,8 +557,11 @@ struct Window::PrivateData {
         if (fModal.childFocus != nullptr)
             return fModal.childFocus->focus();
 
+	//1 = left, 2 = middle, 3 = right
         Widget::MouseEvent ev;
-        ev.button = button;
+        ev.button = (button == GLFW_MOUSE_BUTTON_LEFT) ? 1 :
+			(button == GLFW_MOUSE_BUTTON_MIDDLE) ? 2 :
+			(button == GLFW_MOUSE_BUTTON_RIGHT) ? 3 : 1;
         ev.press  = press;
         ev.mod    = static_cast<Modifier>(mods);
         ev.time = (uint32_t)(glfwGetTime() * 1000.);
@@ -759,7 +763,8 @@ void Window::focus()
 
 void Window::repaint() noexcept
 {
-    glfwSwapBuffers(pData->fView);
+    //glfwSwapBuffers(pData->fView);
+    glfwSwapBuffers(glfwGetCurrentContext());
 }
 
 // static int fib_filter_filename_filter(const char* const name)
@@ -946,7 +951,8 @@ void Window::onDisplayBefore()
 
 void Window::onDisplayAfter()
 {
-    glfwSwapBuffers(pData->fView);
+       // XXX
+       glfwSwapBuffers(glfwGetCurrentContext());
 }
 
 void Window::onReshape(uint width, uint height)
