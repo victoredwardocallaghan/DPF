@@ -53,6 +53,7 @@ struct Window::PrivateData {
           fVisible(false),
           fResizable(true),
           fUsingEmbed(false),
+          fNeedsRepaint(true),
           fWidth(1),
           fHeight(1),
           fTitle(nullptr),
@@ -72,6 +73,7 @@ struct Window::PrivateData {
           fVisible(false),
           fResizable(true),
           fUsingEmbed(false),
+          fNeedsRepaint(true),
           fWidth(1),
           fHeight(1),
           fTitle(nullptr),
@@ -91,6 +93,7 @@ struct Window::PrivateData {
           fVisible(parentId != 0),
           fResizable(parentId == 0),
           fUsingEmbed(parentId != 0),
+          fNeedsRepaint(false),
           fWidth(1),
           fHeight(1),
           fTitle(nullptr),
@@ -300,6 +303,9 @@ struct Window::PrivateData {
         else
             glfwHideWindow(fView);
 
+        // XXX
+        glfwSwapBuffers(fView);
+
         if (yesNo)
         {
             if (fFirstInit)
@@ -405,7 +411,10 @@ struct Window::PrivateData {
     void idle()
     {
 	glfwPollEvents();
-	//glfwSwapBuffers(fView);
+	if (fNeedsRepaint) {
+		onPuglDisplay();
+		fNeedsRepaint = false;
+	}
 
 #ifdef DISTRHO_OS_MAC
         if (fNeedsIdle)
@@ -626,6 +635,7 @@ struct Window::PrivateData {
     bool fVisible;
     bool fResizable;
     bool fUsingEmbed;
+    bool fNeedsRepaint;
     uint fWidth;
     uint fHeight;
     char* fTitle;
@@ -678,7 +688,7 @@ struct Window::PrivateData {
     {
         double x, y;
         glfwGetCursorPos(view, &x, &y);
-        handlePtr->onPuglScroll((int)x, (int)y, dx, dy);
+        handlePtr->onPuglScroll((int)x, (int)y, (float)dx, (float)dy);
     }
 
     static void onCloseCallback(GLFWwindow* view)
@@ -689,6 +699,7 @@ struct Window::PrivateData {
     static void onDisplayCallback(GLFWwindow* view)
     {
         handlePtr->onPuglDisplay();
+	handlePtr->fSelf->repaint();
     }
 
     static void onReshapeCallback(GLFWwindow* view, int width, int height)
@@ -765,7 +776,7 @@ void Window::focus()
 
 void Window::repaint() noexcept
 {
-    glfwSwapBuffers(pData->fView);
+    pData->fNeedsRepaint = true;
 }
 
 // static int fib_filter_filename_filter(const char* const name)
@@ -908,7 +919,7 @@ Application& Window::getApp() const noexcept
 
 intptr_t Window::getWindowId() const noexcept
 {
-    return glfwGetCurrentContext();
+    return 0;
 }
 
 void Window::_addWidget(Widget* const widget)
