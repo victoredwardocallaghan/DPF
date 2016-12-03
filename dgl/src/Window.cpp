@@ -135,6 +135,7 @@ struct Window::PrivateData {
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
         fView = glfwCreateWindow(static_cast<int>(fWidth), static_cast<int>(fHeight), "title", nullptr, nullptr);
+	monitor = glfwGetWindowMonitor(fView);
 
 	// XXX do callbacks latter
 #if 0
