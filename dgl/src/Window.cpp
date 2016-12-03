@@ -151,6 +151,7 @@ struct Window::PrivateData {
         glfwSetDropCallback(fView, fileBrowserSelectedCallback);
 
         glfwMakeContextCurrent(fView);
+	//glfwSwapInterval(0);
 
         fApp.pData->windows.push_back(fSelf);
 
@@ -761,7 +762,8 @@ void Window::focus()
 
 void Window::repaint() noexcept
 {
-    glfwSwapBuffers(pData->fView);
+    //glfwSwapBuffers(pData->fView);
+    glfwSwapBuffers(glfwGetCurrentContext());
 }
 
 // static int fib_filter_filename_filter(const char* const name)
@@ -948,7 +950,8 @@ void Window::onDisplayBefore()
 
 void Window::onDisplayAfter()
 {
-    glfwSwapBuffers(pData->fView);
+       // XXX
+       glfwSwapBuffers(glfwGetCurrentContext());
 }
 
 void Window::onReshape(uint width, uint height)
